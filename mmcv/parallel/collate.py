@@ -76,9 +76,13 @@ def collate(batch: Sequence, samples_per_gpu: int = 1):
         transposed = zip(*batch)
         return [collate(samples, samples_per_gpu) for samples in transposed]
     elif isinstance(batch[0], Mapping):
+        all_keys = set([key 
+            for d in batch
+                for key in d
+        ])
         return {
-            key: collate([d[key] for d in batch], samples_per_gpu)
-            for key in batch[0]
+            key: collate([d[key] for d in batch if key in d], samples_per_gpu)
+            for key in all_keys
         }
     else:
         return default_collate(batch)
